@@ -1,134 +1,141 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 
 const MembroSchema = z.object({
-    nome: z.string().min(3, "Mínimo nome com 3 caracteres"),
-    rank: z.enum(["Bronze", "Prata", "Ouro", "Diamante"], "Selecione um Rank Válido!"),
-    poder: z.number().positive("Poder tem que ser maior que 0").max(100, "Máximo de poder: 100")
+  nome: z.string().min(3, "Minimo de 3 caracteres no nome"),
+  rank: z.enum(
+    ["Bronze", "Prata", "Ouro", "Diamante"],
+    "Selecione um rank valido"
+  ),
+  poder: z
+    .number()
+    .positive("Poder tem que ser maior que 0")
+    .max(100, "Maximo de poder: 100"),
 });
 
 export default function Formulario({ adicionarMembro }) {
-    const [formData, setFormData] = useState({
-        nome: "",
-        rank: "",
-        poder: ""
-    });
-    const [erros, setErros] = useState([]);
+  const [formData, setFormData] = useState({
+    nome: "",
+    rank: "",
+    poder: "",
+  });
+  const [erros, setErros] = useState([]);
 
-    // Tempo que o erro aparece
-    useEffect(() => {
-        if (erros.length > 0) {
-            const timer = setTimeout(() => {
-                setErros([]);
-            }, 3000);
-
-            return () => clearTimeout(timer);
-        }
-    }, [erros]);
-
-    // Pega mudanças que o usuário escreve e coloca como valor dentro do formData
-    function handleChange(e) {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
-        });
-    }
-
-
-    function handleSubmit(e) {
-        e.preventDefault();
-
-        // Converter string em numero
-        const dados = {
-            ...formData,
-            poder: Number(formData.poder)
-        };
-
-        const result = MembroSchema.safeParse(dados);
-
-        if (!result.success) {
-            setErros(result.error.issues);
-            return;
-        }
-
+  useEffect(() => {
+    if (erros.length > 0) {
+      const timer = setTimeout(() => {
         setErros([]);
+      }, 3000);
 
+      return () => clearTimeout(timer);
+    }
+  }, [erros]);
 
-        adicionarMembro(result.data,);
+  function handleChange(e) {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  }
 
-        // Limpar campos
-        setFormData({
-            nome: "",
-            poder: ""
-        });
+  function handleSubmit(e) {
+    e.preventDefault();
+
+    const dados = {
+      ...formData,
+      poder: Number(formData.poder),
+    };
+
+    const result = MembroSchema.safeParse(dados);
+
+    if (!result.success) {
+      setErros(result.error.issues);
+      return;
     }
 
+    setErros([]);
+    adicionarMembro(result.data);
 
+    setFormData({
+      nome: "",
+      rank: "",
+      poder: "",
+    });
+  }
 
-    return (
-        <div>
-            <div className="mt-20 m-auto bg-green-600 border w-120 h-120 rounded-lg p-6">
-                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                    <h1 className=" font-bold text-center">Cadastro de Membros</h1>
+  return (
+    <section className="mx-auto w-full max-w-md rounded-lg bg-amber-50 p-4 text-center text-stone-900 sm:max-w-lg sm:p-6 lg:max-w-xl 2xl:max-w-2xl 2xl:p-8">
+      <h2 className="mb-4 text-2xl font-bold text-stone-900 sm:text-3xl 2xl:text-4xl">
+        Cadastro de Membros
+      </h2>
 
-                    <div className="flex flex-col">
-                        <label className="font-semibold">Nome: </label>
-                        <input
-                            type="text"
-                            name="nome"
-                            placeholder="Nome"
-                            value={formData.nome}
-                            onChange={handleChange}
-                            className="border rounded bg-gray-200 placeholder-gray-500 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                        />
-                    </div>
-
-                    <div className="flex flex-col">
-                        <label className="font-semibold">Rank: </label>
-                        <select
-                            name="rank"
-                            value={formData.rank}
-                            onChange={handleChange}
-                            className="border bg-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-orange-400 p-2"
-                        >
-                            <option value={""}>Selecione um Rank</option>
-                            <option value="Bronze">Bronze</option>
-                            <option value="Prata">Prata</option>
-                            <option value="Ouro">Ouro</option>
-                            <option value="Diamante">Diamante</option>
-
-                        </select>
-                    </div>
-
-                    <div className="flex flex-col">
-                        <label className="font-semibold">Poder: </label>
-                        <input
-                            type="number"
-                            name="poder"
-                            placeholder="Poder"
-                            value={formData.poder}
-                            onChange={handleChange}
-                            className="border rounded px-3 placeholder-gray-500 bg-gray-200 py-2 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                        />
-                    </div>
-
-                    <button
-                        type="submit"
-                        className="bg-blue-500 text-white rounded-lg mt-10 border border-gray-700 px-4 py-2">
-                        Adicionar
-                    </button>
-
-                    {erros.length > 0 && (
-                        <div className="bg-red-100 border-red-400 text-red-700 p-2 rounded-lg">
-                            {erros.map((erros, i) => (
-                                <p key={i}>{erros.message}</p>
-                            ))}
-                        </div>
-                    )}
-
-
-                </form>
-            </div>
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col items-center gap-3 sm:gap-4 2xl:gap-5"
+      >
+        <div className="flex w-full flex-col">
+          <label className="mb-1 text-center text-base font-bold sm:text-lg 2xl:text-xl">
+            Nome:
+          </label>
+          <input
+            type="text"
+            name="nome"
+            placeholder="Nome do membro"
+            value={formData.nome}
+            onChange={handleChange}
+            className="w-full rounded border border-stone-400 bg-white px-3 py-2 text-sm sm:px-4 sm:py-3 sm:text-base 2xl:text-lg"
+          />
         </div>
-    );
+
+        <div className="flex w-full flex-col">
+          <label className="mb-1 text-center text-base font-bold sm:text-lg 2xl:text-xl">
+            Rank:
+          </label>
+          <select
+            name="rank"
+            value={formData.rank}
+            onChange={handleChange}
+            className="w-full rounded border border-stone-400 bg-white px-3 py-2 text-sm sm:px-4 sm:py-3 sm:text-base 2xl:text-lg"
+          >
+            <option value="">Selecione um rank</option>
+            <option value="Bronze">Bronze</option>
+            <option value="Prata">Prata</option>
+            <option value="Ouro">Ouro</option>
+            <option value="Diamante">Diamante</option>
+          </select>
+        </div>
+
+        <div className="flex w-full flex-col">
+          <label className="mb-1 text-center text-base font-bold sm:text-lg 2xl:text-xl">
+            Poder:
+          </label>
+          <input
+            type="number"
+            min="1"
+            max="100"
+            name="poder"
+            placeholder="Nivel de poder"
+            value={formData.poder}
+            onChange={handleChange}
+            className="w-full rounded border border-stone-400 bg-white px-3 py-2 text-sm sm:px-4 sm:py-3 sm:text-base 2xl:text-lg"
+          />
+        </div>
+
+        <button
+          type="submit"
+          className="w-full cursor-pointer rounded bg-amber-800 px-6 py-2 text-sm font-semibold text-amber-50 hover:bg-amber-900 sm:w-auto sm:text-base 2xl:px-8 2xl:py-3 2xl:text-lg"
+        >
+          Adicionar
+        </button>
+
+        {erros.length > 0 && (
+          <div className="w-full rounded border border-red-300 bg-red-100 p-3 text-sm text-red-700 sm:text-base 2xl:text-lg">
+            {erros.map((erro, i) => (
+              <p key={i}>{erro.message}</p>
+            ))}
+          </div>
+        )}
+      </form>
+    </section>
+  );
 }
